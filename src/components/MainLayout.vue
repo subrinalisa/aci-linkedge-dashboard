@@ -3,12 +3,11 @@
     <Menu />
     <a-layout>
       <Header />
-      <a-layout-content>
-        <div class="h-[100%] bg-white p-4 overflow-y-auto mt-4"><slot></slot></div>
+      <a-layout-content style="margin: 16px 0 0">
+        <div class="p-5 bg-white h-full overflow-y-auto">
+          <slot></slot>
+        </div>
       </a-layout-content>
-      <a-layout-footer style="text-align: center; padding: 14px 16px">
-        Created By MIS</a-layout-footer
-      >
     </a-layout>
   </a-layout>
 </template>

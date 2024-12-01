@@ -13,7 +13,9 @@
             <a-dropdown :trigger="['click']">
               <a class="ant-dropdown-link cursor-pointer" @click.prevent>
                 <i class="bi bi-person-circle text-lg mr-2 text-indigo-500"></i>
-                <span class="text-xs lg:text-base">{{ userInfo?.name }} </span>
+                <span class="text-xs lg:text-base"
+                  >{{ userInfo?.name }} ({{ userInfo?.user_id }})</span
+                >
               </a>
               <template #overlay>
                 <a-menu>
@@ -30,39 +32,6 @@
       </div>
     </div></a-layout-header
   >
-  <!-- <header class="mb-4 ml-20 mr-3"> -->
-  <!-- <div class="flex justify-end items-center">
-      <div>
-        <ul class="flex items-center space-x-3 list-none p-0 profile-menu">
-          <li class="hidden md:block">
-            <span class="font-bold">{{ time }}</span>
-          </li>
-          <li class="hidden md:block">
-            <span class="font-bold">{{ date }}</span>
-          </li>
-          <li>
-            <a-dropdown :trigger="['click']">
-              <a class="ant-dropdown-link cursor-pointer" @click.prevent>
-                <i class="bi bi-person-circle text-lg mr-2 text-indigo-500"></i>
-                <span class="text-xs lg:text-base"
-                  >{{ userInfo?.name }} ({{ userInfo?.email }})</span
-                >
-              </a>
-              <template #overlay>
-                <a-menu>
-                  <a-menu-item>
-                    <button type="button" class="w-full text-left" @click="handleLogout($router)">
-                      Logout
-                    </button>
-                  </a-menu-item>
-                </a-menu>
-              </template>
-            </a-dropdown>
-          </li>
-        </ul>
-      </div>
-    </div> -->
-  <!-- </header> -->
 </template>
 
 <script setup>

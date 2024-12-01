@@ -12,7 +12,6 @@ const usersList = ref(null);
 const isLoading = ref(false);
 const search = ref("");
 
-// Pagination
 const paginate = ref(10);
 const total = ref(0);
 
@@ -48,7 +47,6 @@ const getRoles = async () => {
 /* User Create */
 const open = ref(false);
 const userLoading = ref(false);
-
 const registerEmail = ref();
 
 const register = ref({
@@ -117,9 +115,9 @@ onMounted(async () => {
 
 <template>
   <MainLayout>
-    <div class="md:flex justify-between mb-3">
+    <div class="md:flex justify-between">
       <!-- Search -->
-      <div class="grow">
+      <div class="grow mb-3">
         <input
           type="text"
           placeholder="Search User..."
@@ -128,8 +126,7 @@ onMounted(async () => {
           @input="getUsers()"
         />
       </div>
-
-      <div>
+      <div class="mb-3">
         <button @click="open = true" class="c-btn flex items-center gap-x-2">
           <PlusOutlined />
           <span>Add New User</span>
@@ -180,16 +177,7 @@ onMounted(async () => {
             required
           />
         </div>
-        <!-- <div class="mb-2">
-          <label class="block mb-1">Role</label>
-          <select class="border w-full rounded px-3 py-1 outline-none" v-model="register.roles">
-            <option value="">-- Select Role --</option>
-            <option value="0" v-if="roleLoading">Loading...</option>
-            <template v-for="item in roleList" :key="item?.id">
-              <option :value="item?.name">{{ item?.name }}</option>
-            </template>
-          </select>
-        </div> -->
+
         <button type="submit" class="c-btn mt-3">
           Create
           <Spinner v-if="userLoading" />
@@ -202,10 +190,9 @@ onMounted(async () => {
         <thead class="table-header">
           <tr>
             <th class="text-center">Actions</th>
-            <th>User</th>
+            <th>Name</th>
             <th>User ID</th>
             <th>Email</th>
-            <th>Role</th>
             <th>Permissions</th>
           </tr>
         </thead>
@@ -243,7 +230,6 @@ onMounted(async () => {
             </td>
             <td class="text-left">
               <span class="md:hidden mr-1 font-semibold">Name:</span>
-
               {{ item?.name }}
             </td>
             <td class="text-left">
@@ -255,43 +241,15 @@ onMounted(async () => {
               {{ item?.email }}
             </td>
             <td class="text-left">
-              <div class="flex lg:flex-col-reverse">
-                <span class="md:hidden mr-1 font-semibold">Role:</span>
-                <div v-if="!item?.roles?.length">-</div>
-                <div v-else>
-                  <span v-for="(role, index) in item?.roles" :key="index">
-                    {{ role?.name
-                    }}<span class="mr-1" v-if="index + 1 != item?.roles?.length">,</span>
-                  </span>
-                </div>
-              </div>
-            </td>
-            <td class="text-left">
-              <div class="flex">
-                <span class="md:hidden mr-1 font-semibold">Permissions:</span>
-                <div v-if="Object.values(item?.module_wise_permissions)?.length == 0">-</div>
-
-                <span
-                  class="capitalize text-blue-500"
-                  v-for="(permissions, module, key) in item?.module_wise_permissions"
-                  :key="key"
-                >
-                  {{ module }} -
-                  <span
-                    class="capitalize text-blue-500"
-                    v-for="(permission, index) in permissions"
-                    :key="index"
-                  >
-                    {{ permission?.name }}
-                    <span class="mr-1" v-if="index < permissions?.length - 1">, </span>
-                  </span>
-                  <span
-                    class="mr-1"
-                    v-if="key < Object.values(item?.module_wise_permissions)?.length - 1"
-                    >|
-                  </span>
-                </span>
-              </div>
+              <span class="md:hidden mr-1 font-semibold">Permissions:</span>
+              <span
+                class="capitalize text-blue-500"
+                v-for="(permission, index) in item?.permissions"
+                :key="index"
+              >
+                <span>{{ permission?.name }}</span>
+                <span class="mr-1" v-if="index < item?.permissions?.length - 1">,</span>
+              </span>
             </td>
           </tr>
         </tbody>

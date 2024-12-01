@@ -1,14 +1,14 @@
 <template>
   <MainLayout>
-    <div class="grid grid-cols-5 gap-3">
+    <div class="md:grid md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-6 gap-3">
       <button
-        class="w-full block border text-center p-3"
+        class="w-full text-left border rounded flex justify-between items-start gap-x-2 p-4 shadow-md hover:border-secondary transition duration-300 ease-in-out mb-3"
         v-for="(item, index) in allpermissions"
         :key="index"
         @click="$router.push({ name: 'dynamic', params: { id: item?.params } })"
       >
-        <h2 class="text-secondary font-semibold mb-1 text-base">{{ item?.title }}</h2>
-        <button type="button" class="font-semibold">Open</button>
+        <h2 class="font-medium">{{ item?.title }}</h2>
+        <BarChartOutlined class="text-secondary text-2xl" />
       </button>
     </div>
   </MainLayout>
@@ -16,17 +16,14 @@
 
 <script setup>
 import MainLayout from "@/components/MainLayout.vue";
+import { BarChartOutlined } from "@ant-design/icons-vue";
 import { ref } from "vue";
 
 const allpermissions = ref(
   JSON.parse(localStorage.getItem("all_permissions")).map((item) => ({
     title: item?.name,
-    icon: "bi bi-house",
     path: "dynamic",
     params: item?.name?.replace(/\s+/g, "_"),
-    key: item?.name,
   }))
 );
 </script>
-
-<style lang="scss" scoped></style>

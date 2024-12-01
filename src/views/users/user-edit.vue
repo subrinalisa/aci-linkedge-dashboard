@@ -171,15 +171,12 @@ onMounted(async () => {
 <template>
   <MainLayout>
     <a-skeleton v-if="isLoading" />
-    <div class="grid grid-cols-3 gap-3" v-else>
+    <div class="md:grid grid-cols-3 gap-3" v-else>
       <div class="border text-center py-3 px-5 rounded mb-3">
         <h2 class="text-xl font-semibold capitalize mt-4">{{ userData?.name }}</h2>
-        <div class="flex flex-wrap justify-center mt-2">
-          <span
-            v-for="(role, index) in userData?.roles"
-            :key="index"
-            class="bg-gray-200 text-gray-700 rounded-full px-4 py-1 text-sm font-medium"
-            >{{ role?.name }}
+        <div class="flex flex-wrap justify-center gap-2 mt-2">
+          <span class="bg-gray-200 text-gray-700 rounded-full px-4 py-1 text-sm font-medium"
+            >{{ userData?.user_id }}
           </span>
         </div>
         <hr class="my-3" />
@@ -187,67 +184,55 @@ onMounted(async () => {
           <h3 class="text-lg font-semibold">Details</h3>
           <p class="capitalize"><strong class="mr-1">Name:</strong> {{ userData?.name }}</p>
           <p><strong class="mr-1">Email:</strong> {{ userData?.email }}</p>
-          <!-- <p class="capitalize">
-            <strong class="mr-1">Roles:</strong>
-            <span v-for="(role, index) in userData?.roles" :key="index">{{ role.name }} </span>
-          </p> -->
+
           <p>
             <strong class="mr-1">Manage Dashboard Permissions:</strong>
             <span
               class="capitalize text-blue-500"
-              v-for="(permissions, module, key) in userData?.module_wise_permissions"
-              :key="key"
+              v-for="(permission, index) in userData?.all_permissions"
+              :key="index"
             >
-              {{ module }} -
-              <span
-                class="capitalize text-blue-500"
-                v-for="(permission, index) in permissions"
-                :key="index"
-              >
-                {{ permission?.name }}
-                <span class="mr-1" v-if="index < permissions?.length - 1">, </span>
-              </span>
-              <span
-                class="mr-1"
-                v-if="key < Object.values(userData?.module_wise_permissions)?.length - 1"
-                >|
-              </span>
+              <span>{{ permission?.name }}</span>
+              <span class="mr-1" v-if="index < userData?.all_permissions?.length - 1">,</span>
             </span>
           </p>
         </div>
       </div>
       <div class="col-span-2">
         <div class="mb-3 py-3 px-5 rounded-md border">
-          <div class="flex justify-between items-center">
-            <h2 class="title">Update User</h2>
-            <button type="button" class="c-btn" @click="$router.go(-1)">Back</button>
+          <div class="md:flex justify-between items-center">
+            <h2 class="title mb-3">Update User</h2>
+            <button type="button" class="c-btn mb-3" @click="$router.go(-1)">Back</button>
           </div>
           <form @submit.prevent="userEdit($router)">
             <div class="mb-3">
               <h4 class="text-base font-medium mb-1">Name <span class="text-red-600">*</span></h4>
-              <input type="text" class="input-text" v-model="formData.name" required />
+              <input
+                type="text"
+                class="border w-full rounded px-3 py-1 outline-none"
+                v-model="formData.name"
+                required
+              />
             </div>
             <div class="mb-3">
               <h4 class="text-base font-medium mb-1">
                 User ID <span class="text-red-600">*</span>
               </h4>
-              <input type="text" class="input-text" v-model="formData.user_id" required />
+              <input
+                type="text"
+                class="border w-full rounded px-3 py-1 outline-none"
+                v-model="formData.user_id"
+                required
+              />
             </div>
             <div class="mb-3">
               <h4 class="text-base font-medium mb-1">Email</h4>
-              <input type="email" class="input-text" v-model="formData.email" />
+              <input
+                type="email"
+                class="border w-full rounded px-3 py-1 outline-none"
+                v-model="formData.email"
+              />
             </div>
-
-            <!-- <div class="mb-3">
-              <h4 class="text-base font-medium mb-1">Roles</h4>
-              <p v-if="roleLoading">Loading...</p>
-              <p class="mb-1" v-for="item in roleList" :key="item?.id">
-                <label
-                  ><input type="checkbox" :value="item?.name" v-model="formData.roles" />
-                  <span class="align-baseline ml-2 capitalize">{{ item?.name }}</span></label
-                >
-              </p>
-            </div> -->
             <div class="mb-3">
               <!-- {{ permissionList }} -->
               <h4 class="text-base font-medium mb-1 flex items-center gap-x-2">
@@ -290,9 +275,9 @@ onMounted(async () => {
                 </li>
               </ul>
             </div>
-            <div>
-              <button type="submit" class="c-btn">Update <Spinner v-if="isUpdating" /></button>
-              <button type="button" class="d-btn ml-3" @click="$router.go(-1)">Cancel</button>
+            <div class="md:flex gap-2">
+              <button type="submit" class="c-btn mb-2">Update <Spinner v-if="isUpdating" /></button>
+              <button type="button" class="d-btn mb-2" @click="$router.go(-1)">Cancel</button>
             </div>
           </form>
         </div>

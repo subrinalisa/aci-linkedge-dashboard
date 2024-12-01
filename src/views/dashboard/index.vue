@@ -25,7 +25,10 @@ watch(() => route.params.id, updateReportData, { immediate: true });
       <button type="button" class="c-btn" @click="$router.go(-1)">go back</button>
     </template>
     <template v-else>
-      <h2 class="title">{{ $route?.params?.id?.replace(/_/g, " ") }}</h2>
+      <div class="md:flex justify-between items-center">
+        <h2 class="title mb-3">{{ $route?.params?.id?.replace(/_/g, " ") }}</h2>
+        <button type="button" class="c-btn mb-3" @click="$router.go(-1)">Back</button>
+      </div>
       <div v-if="!reportData?.url && !reportData?.secondary_url">
         No URL Found in primary or secondary
       </div>

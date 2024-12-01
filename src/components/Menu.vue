@@ -1,153 +1,100 @@
 <template>
-  <a-layout-sider v-model:collapsed="collapsed" collapsible width="250" collapsedWidth="50">
+  <a-layout-sider
+    v-model:collapsed="collapsed"
+    collapsible
+    class="overflow-y-auto whitespace-nowrap"
+    width="250"
+    collapsedWidth="50"
+  >
     <a-menu
-      v-model:selectedKeys="selectedKeys"
-      v-model:openKeys="openKeys"
-      theme="dark"
+      v-model:openKeys="state.openKeys"
+      v-model:selectedKeys="state.selectedKeys"
       mode="inline"
-    >
-      <!-- Home -->
-
-      <a-menu-item key="home">
-        <router-link :to="{ name: 'home' }" class="flex gap-x-2 items-center">
-          <HomeOutlined />
-          <span>Home</span>
-        </router-link>
-      </a-menu-item>
-      <!-- My Dashboards -->
-      <a-sub-menu :key="myDashboards?.key">
-        <template #title>
-          <span class="flex gap-x-2 items-center">
-            <DashboardOutlined />
-            <span>{{ myDashboards?.title }}</span>
-          </span>
-        </template>
-        <a-menu-item v-for="item in myDashboards?.child" :key="item?.key">
-          <router-link
-            :to="{ name: item?.path, params: { id: item?.params } }"
-            class="flex gap-x-2 items-center"
-          >
-            <DashboardOutlined />
-            <span>{{ item?.title }}</span>
-          </router-link>
-        </a-menu-item>
-      </a-sub-menu>
-      <!-- All Menu -->
-      <div v-for="(menu, index) in menuItems" :key="index" v-if="userInfo?.user_id == '123456'">
-        <!-- Menu Item -->
-        <!-- <a-menu-item :key="menu?.key" v-if="!menu?.child">
-          <router-link :to="{ name: menu?.path }" class="flex gap-x-2 items-center">
-            <UserSwitchOutlined />
-            <span>{{ menu?.title }}</span>
-          </router-link>
-        </a-menu-item> -->
-        <!-- Sub Menu -->
-        <a-sub-menu :key="menu?.key" v-if="menu?.child">
-          <template #title>
-            <span class="flex gap-x-2 items-center">
-              <UserSwitchOutlined />
-              <span>{{ menu?.title }}</span>
-            </span>
-          </template>
-          <a-menu-item v-for="submenu in menu?.child" :key="submenu?.key">
-            <router-link :to="{ name: submenu?.path }" class="flex gap-x-2 items-center">
-              <DashboardOutlined />
-              <span>{{ submenu?.title }}</span>
-            </router-link>
-          </a-menu-item>
-        </a-sub-menu>
-      </div>
-    </a-menu>
+      theme="dark"
+      :inline-collapsed="state.collapsed"
+      :items="items"
+    ></a-menu>
   </a-layout-sider>
 </template>
 
 <script setup>
-import { DashboardOutlined, HomeOutlined, UserSwitchOutlined } from "@ant-design/icons-vue";
-import { ref, watch } from "vue";
-import { useRoute } from "vue-router";
+import { ref, watch, reactive, h, onMounted } from "vue";
+import { HomeOutlined, PieChartOutlined, UserOutlined } from "@ant-design/icons-vue";
+import { useRoute, useRouter } from "vue-router";
 
-// Menu items data
-const allpermissions = ref(
-  JSON.parse(localStorage.getItem("all_permissions")).map((item) => ({
-    title: item?.name,
-    icon: "bi bi-house",
-    path: "dynamic",
-    params: item?.name?.replace(/\s+/g, "_"),
-    key: item?.name?.replace(/\s+/g, "_"),
-  }))
-);
-const myDashboards = ref({
-  title: "My Dashboards",
-  key: "dashboards",
-  child: allpermissions.value,
-});
-const menuItems = ref([
-  {
-    title: "Manage Permissions",
-    icon: "bi bi-people",
-    key: "user",
-    child: [
-      {
-        title: "Users",
-        icon: "bi bi-house",
-        path: "user",
-        key: "user",
-      },
-      {
-        title: "Management Dashboard",
-        icon: "bi bi-house",
-        path: "permissions",
-        key: "permissions",
-      },
-      // {
-      //   title: "Role",
-      //   icon: "bi bi-house",
-      //   path: "role",
-      //   key: "role",
-      // },
-    ],
-  },
-  // myDashboards.value,
-]);
+const userInfo = JSON.parse(localStorage.getItem("userInfo"));
+const route = useRoute();
+const router = useRouter();
 
 const collapsed = ref(false);
+const state = reactive({
+  openKeys: [],
+  selectedKeys: [route.path],
+});
+const allpermissions = ref(
+  JSON.parse(localStorage.getItem("all_permissions")).map((item) => ({
+    key: `/${item?.name?.replace(/\s+/g, "_")}`,
+    label: item?.name,
+    onClick: () =>
+      router.push({ name: "dynamic", params: { id: item?.name?.replace(/\s+/g, "_") } }),
+  }))
+);
 
-const selectedKeys = ref([]);
-const openKeys = ref([]);
-const route = useRoute();
+const items = reactive([
+  {
+    key: "/home",
+    label: "Home",
+    icon: () => h(HomeOutlined),
+    onClick: () => router.push("/home"),
+  },
+  {
+    key: "dashboards",
+    label: "My Dashboards",
+    icon: () => h(PieChartOutlined),
+    children: allpermissions.value,
+  },
+
+  ...(userInfo?.user_id == "123456"
+    ? [
+        {
+          key: "permissions",
+          label: "Manage Permissions",
+          icon: () => h(UserOutlined),
+          children: [
+            {
+              key: "/permissions",
+              label: "Manage Dashboards",
+              onClick: () => router.push("/permissions"),
+            },
+            {
+              key: "/user",
+              label: "Manage Users",
+              onClick: () => router.push("/user"),
+            },
+          ],
+        },
+      ]
+    : []),
+]);
 
 watch(
-  () => route.name,
-  (currentName) => {
-    selectedKeys.value = [currentName];
-    openKeys.value = [];
+  () => route.path,
+  (newPath) => {
+    const parentKey = items.find((item) =>
+      item.children?.some((child) => newPath.startsWith(child.key))
+    )?.key;
 
-    const findParentKeys = (menuList, currentName) => {
-      for (const menu of menuList) {
-        if (menu.child) {
-          if (menu.child.some((subMenu) => subMenu.path === currentName)) {
-            openKeys.value.push(menu.key); // Add parent key
-            return true; // Stop searching in deeper levels
-          } else if (findParentKeys(menu.child, currentName)) {
-            openKeys.value.push(menu.key); // Add parent key
-            return true; // Stop searching in deeper levels
-          }
-        } else if (menu.path === currentName) {
-          return true;
-        }
-      }
-      return false;
-    };
-
-    findParentKeys(menuItems.value, currentName);
-
-    // Special handling for "My Dashboards"
-    if (currentName && currentName.startsWith("dynamic")) {
-      openKeys.value.push("dashboards"); // Expand "My Dashboards"
-      selectedKeys.value = [currentName];
-    }
+    state.openKeys = parentKey ? [parentKey] : [];
+    state.selectedKeys = [
+      items
+        .flatMap((item) => (item.children ? item.children : item))
+        .find((child) => newPath.startsWith(child.key))?.key || newPath,
+    ];
   },
   { immediate: true }
 );
-const userInfo = JSON.parse(localStorage.getItem("userInfo"));
+
+onMounted(() => {
+  if (window.innerWidth < 760) collapsed.value = true;
+});
 </script>
