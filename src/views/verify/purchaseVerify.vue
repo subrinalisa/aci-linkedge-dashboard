@@ -1,0 +1,396 @@
+<script setup>
+import MainLayout from "@/components/MainLayout.vue";
+import { useVerifyStore } from "@/stores/verify.js";
+import { usePsalesStore } from "@/stores/psales";
+
+import { storeToRefs } from "pinia";
+import { onMounted, ref } from "vue";
+import { useRoute } from "vue-router";
+
+const verifyStore = useVerifyStore();
+const psalesStore = usePsalesStore();
+
+const { getPurchaseDetails, getPurchaseSuspended, getPurchaseVerified } = verifyStore;
+const { isLoading, isSubmitting } = storeToRefs(verifyStore);
+const { paymentList } = storeToRefs(psalesStore);
+const { getPayment } = psalesStore;
+
+const route = useRoute();
+const { id } = route?.params;
+const allData = ref(null);
+
+const verifyData = ref({
+  payment_method_id: "",
+  paid_amount: "",
+  amount_due: "",
+  note: "",
+});
+
+onMounted(async () => {
+  allData.value = await getPurchaseDetails(id);
+  await getPayment();
+  verifyData.value.payment_method_id = 2;
+  verifyData.value.note = allData.value?.note;
+  verifyData.value.paid_amount = allData.value?.paid_amount;
+  verifyData.value.amount_due = allData.value?.amount_due || 0;
+});
+</script>
+
+<template>
+  <MainLayout>
+    <a-skeleton active v-if="isLoading" />
+    <div class="grid grid-cols-3 gap-4" v-else>
+      <div class="col-span-2">
+        <!-- Table -->
+        <div class="overflow-x-auto">
+          <table class="purchase-table">
+            <thead class="table-header">
+              <tr>
+                <th class="text-center">SL</th>
+                <th class="text-left">Item Name</th>
+                <th class="text-left">Pack Size</th>
+                <th class="text-right">TP</th>
+                <th class="text-right">VAT</th>
+                <th class="text-right">Cost</th>
+                <th class="text-right">Qty.</th>
+                <th class="text-right">Disc %</th>
+                <th class="text-right">Disc (Amount)</th>
+                <th class="text-right">Getis %</th>
+                <th class="text-right">Getis (Amount)</th>
+                <th class="text-right">Total</th>
+              </tr>
+            </thead>
+            <tbody class="table-body">
+              <tr v-for="(product, index) in allData?.purchase_products" :key="index">
+                <td class="text-center">{{ index + 1 }}</td>
+                <td class="w-full">
+                  <p>{{ product?.product_name }}</p>
+                  <div class="mt-3">
+                    <p>
+                      <span class="font-semibold">Size:</span>
+                      {{ product?.size }}
+                    </p>
+                    <p>
+                      <span class="font-semibold">Generic Name:</span>
+                      {{ product?.generic_name || "Empty" }}
+                    </p>
+                    <p>
+                      <span class="font-semibold">Serial:</span>
+                      {{ product?.serial || "Empty" }}
+                    </p>
+                    <p>
+                      <span class="font-semibold">Stock:</span>
+                      {{ product?.stock || "Empty" }}
+                    </p>
+                    <p>
+                      <span class="font-semibold">Cost Price Preview:</span>
+                      {{ Number(product?.cost)?.toFixed(2) }}
+                    </p>
+                    <p>
+                      <span class="font-semibold">Item Id:</span>
+                      {{ product?.id || "-" }}
+                    </p>
+                    <p>
+                      <span class="font-semibold">Expire Date:</span>
+                      {{ product?.expiry_date || "Empty" }}
+                    </p>
+                  </div>
+                </td>
+                <td>{{ product?.pack_size?.name }}({{ product?.pack_size?.quantity }})</td>
+                <td class="text-right">
+                  {{ Number(product?.tp).toFixed(2) }}
+                </td>
+                <td class="text-right">
+                  {{ Number(product?.vat).toFixed(2) }}
+                </td>
+                <td class="text-right">
+                  {{ Number(product?.cost).toFixed(2) }}
+                </td>
+                <td class="text-right min-w-20">
+                  {{ Number(product?.received_quantity).toFixed(2) }}
+                </td>
+                <td class="text-right min-w-20">
+                  {{ Number(product?.discount_percent).toFixed(2) }}
+                </td>
+                <td class="text-right min-w-20">
+                  {{ Number(product?.discount_amount).toFixed(2) }}
+                </td>
+                <td class="text-right min-w-20">
+                  {{ Number(product?.getis_percent).toFixed(2) }}
+                </td>
+                <td class="text-right min-w-20">
+                  {{ Number(product?.getis_amount).toFixed(2) }}
+                </td>
+                <td class="text-right">
+                  {{ Number(product?.total).toFixed(2) }}
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+        <!-- Bnous -->
+        <h6 class="title mt-3" v-if="allData?.purchase_bonus_products?.length">Bonus</h6>
+        <div class="overflow-x-auto" v-if="allData?.purchase_bonus_products?.length">
+          <table class="purchase-table">
+            <thead class="table-header">
+              <tr>
+                <th class="text-center">SL</th>
+                <th class="text-left">Item Name</th>
+                <th class="text-left">Pack Size</th>
+                <th class="text-right">TP</th>
+                <th class="text-right">VAT</th>
+                <th class="text-right">Cost</th>
+                <th class="text-right">Qty.</th>
+
+                <th class="text-right">Total</th>
+              </tr>
+            </thead>
+            <tbody class="table-body">
+              <tr v-for="(product, index) in allData?.purchase_bonus_products" :key="index">
+                <td class="text-center">{{ index + 1 }}</td>
+                <td class="w-full">
+                  <p>{{ product?.product_name }}</p>
+                  <div class="mt-3">
+                    <p>
+                      <span class="font-semibold">Size:</span>
+                      {{ product?.size }}
+                    </p>
+                    <p>
+                      <span class="font-semibold">Generic Name:</span>
+                      {{ product?.generic_name || "Empty" }}
+                    </p>
+                    <p>
+                      <span class="font-semibold">Serial:</span>
+                      {{ product?.serial || "Empty" }}
+                    </p>
+                    <p>
+                      <span class="font-semibold">Stock:</span>
+                      {{ product?.stock || "Empty" }}
+                    </p>
+                    <p>
+                      <span class="font-semibold">Cost Price Preview:</span>
+                      {{ Number(product?.cost)?.toFixed(2) }}
+                    </p>
+                    <p>
+                      <span class="font-semibold">Item Id:</span>
+                      {{ product?.id || "-" }}
+                    </p>
+                    <p>
+                      <span class="font-semibold">Expire Date:</span>
+                      {{ product?.expiry_date || "Empty" }}
+                    </p>
+                  </div>
+                </td>
+                <td>{{ product?.pack_size?.name }}({{ product?.pack_size?.quantity }})</td>
+                <td class="text-right">
+                  {{ Number(product?.tp).toFixed(2) }}
+                </td>
+                <td class="text-right">
+                  {{ Number(product?.vat).toFixed(2) }}
+                </td>
+                <td class="text-right">
+                  {{ Number(product?.cost).toFixed(2) }}
+                </td>
+                <td class="text-right min-w-20">
+                  {{ Number(product?.received_quantity).toFixed(2) }}
+                </td>
+
+                <td class="text-right">
+                  {{ Number(product?.total).toFixed(2) }}
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+      <div class="right-side">
+        <div class="border border-slate-300 px-3 py-2 mb-2">
+          <div class="flex items-center">
+            <p class="w-32 mb-2">Branch</p>
+            <input
+              type="text"
+              class="w-full px-3 py-1 border mb-2"
+              :value="allData?.branch?.organization_name"
+              readonly
+            />
+          </div>
+          <div class="flex items-center">
+            <p class="w-32 mb-2">MRR</p>
+            <input
+              type="text"
+              class="w-full px-3 py-1 border mb-2"
+              :value="allData?.mrr?.name"
+              readonly
+            />
+          </div>
+          <div class="flex items-center">
+            <p class="w-32 mb-2">Supplier</p>
+            <input
+              type="text"
+              class="w-full px-3 py-1 border mb-2"
+              :value="allData?.supplier?.company_name"
+              readonly
+            />
+          </div>
+        </div>
+        <!-- Total -->
+        <div class="border border-slate-300 px-3 py-2 mb-2">
+          <div class="flex items-center">
+            <p class="w-32 mb-2">Sub Total</p>
+            <input
+              type="text"
+              class="w-full px-3 py-1 border mb-2 text-right"
+              :value="allData?.sub_total"
+              readonly
+            />
+          </div>
+          <div class="flex items-center">
+            <p class="w-32 mb-2">Gatis %</p>
+            <input
+              type="text"
+              class="w-full px-3 py-1 border mb-2 text-right"
+              :value="allData?.getis_percent"
+              readonly
+            />
+          </div>
+          <div class="flex items-center">
+            <p class="w-32 mb-2">Gatis (৳)</p>
+            <input
+              type="text"
+              class="w-full px-3 py-1 border mb-2 text-right"
+              :value="allData?.amount"
+              readonly
+            />
+          </div>
+          <div class="flex items-center">
+            <p class="w-32 mb-2">Discount %</p>
+            <input
+              type="text"
+              class="w-full px-3 py-1 border mb-2 text-right"
+              :value="allData?.discount_all_percent"
+              readonly
+            />
+          </div>
+          <div class="flex items-center">
+            <p class="w-32 mb-2">Entire Discount</p>
+            <input
+              type="text"
+              class="w-full px-3 py-1 border mb-2 text-right"
+              :value="allData?.discount_entire_purchase"
+              readonly
+            />
+          </div>
+          <div class="flex items-center">
+            <p class="w-32 mb-2">Total</p>
+            <input
+              type="text"
+              class="w-full px-3 py-1 border mb-2 text-right"
+              :value="allData?.total"
+              readonly
+            />
+          </div>
+          <div class="flex items-center">
+            <p class="w-32 mb-2">Amount Due</p>
+            <input
+              type="number"
+              class="w-full px-3 py-1 border mb-2 text-right"
+              v-model="verifyData.amount_due"
+              readonly
+            />
+          </div>
+        </div>
+        <div class="border border-slate-300 px-3 py-2 mb-2">
+          <div class="flex items-center">
+            <p class="w-32 mb-2">Payment Method</p>
+            <select
+              class="w-full px-3 py-1 border mb-2 bg-blue-100 outline-none"
+              v-model="verifyData.payment_method_id"
+              @change="
+                () => {
+                  if (verifyData.payment_method_id == 6) {
+                    verifyData.amount_due = allData?.total;
+                    verifyData.paid_amount = 0;
+                  } else {
+                    verifyData.paid_amount = allData?.total;
+
+                    verifyData.amount_due = Number(allData?.total - verifyData.paid_amount).toFixed(
+                      2
+                    );
+                  }
+                }
+              "
+            >
+              <template v-for="item in paymentList">
+                <option :value="item?.id">{{ item?.name }}</option>
+              </template>
+            </select>
+          </div>
+          <div class="flex items-center">
+            <p class="w-32 mb-2">Total Paid</p>
+            <input
+              type="number"
+              class="w-full bg-blue-100 outline-none px-3 py-2 border mb-2 text-right"
+              v-model="verifyData.paid_amount"
+              min="0"
+              @input="
+                if (verifyData.paid_amount > allData?.total) {
+                  verifyData.paid_amount = allData?.total;
+                }
+                verifyData.amount_due = Number(allData?.total - verifyData.paid_amount).toFixed(2);
+              "
+              @keydown="
+                (event) => {
+                  if (
+                    event.key == '.' ||
+                    event.key == '+' ||
+                    event.key == '-' ||
+                    event.key == 'E' ||
+                    event.key == 'e'
+                  ) {
+                    event.preventDefault();
+                  }
+                }
+              "
+            />
+          </div>
+          <div class="flex items-center">
+            <p class="w-32 mb-2">Notes</p>
+            <textarea
+              type="text"
+              class="w-full px-3 py-1 border mb-2 bg-blue-100 outline-none"
+              rows="3"
+              v-model="verifyData.note"
+            ></textarea>
+          </div>
+        </div>
+        <a-popconfirm
+          :title="`Are you sure you want to accept ${allData?.suspend_request_user?.name} suspend request?`"
+          ok-text="Yes"
+          cancel-text="No"
+          @confirm="getPurchaseSuspended(id, $router)"
+        >
+          <button
+            class="submit-btn mr-2"
+            type="button"
+            :style="
+              allData?.suspend_request != 1 ? 'background-color: #cccccc; color: #666666;' : ''
+            "
+            :disabled="allData?.suspend_request != 1"
+          >
+            Delete
+          </button>
+        </a-popconfirm>
+
+        <button
+          class="cancel-btn mr-2"
+          type="button"
+          @click="getPurchaseVerified(id, $router, verifyData)"
+        >
+          Verified
+        </button>
+        <button class="cancel-btn mr-2" type="button" @click="$router.go(-1)">Back</button>
+        <a-spin v-if="isSubmitting" />
+      </div>
+    </div>
+  </MainLayout>
+</template>
