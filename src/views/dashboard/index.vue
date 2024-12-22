@@ -1,5 +1,6 @@
 <script setup>
 import MainLayout from "@/components/MainLayout.vue";
+import PowerBIEmbed from "@/components/PowerBIEmbed.vue";
 import { ref, watch } from "vue";
 import { useRoute } from "vue-router";
 
@@ -8,13 +9,11 @@ const allpermissions = ref(JSON.parse(localStorage.getItem("all_permissions")));
 
 const reportData = ref(null);
 
-// Function to update reportData based on route params
 const updateReportData = () => {
-  const id = route?.params?.id?.replace(/_/g, " ");
+  const id = route?.query?.name?.replace(/_/g, " ");
   reportData.value = allpermissions.value.find((item) => item.name === id) || "";
 };
 
-// Watch for route parameter changes and update reportData
 watch(() => route.params.id, updateReportData, { immediate: true });
 </script>
 
@@ -26,13 +25,13 @@ watch(() => route.params.id, updateReportData, { immediate: true });
     </template>
     <template v-else>
       <div class="md:flex justify-between items-center">
-        <h2 class="title mb-3">{{ $route?.params?.id?.replace(/_/g, " ") }}</h2>
+        <h2 class="title mb-3">{{ $route?.query?.name?.replace(/_/g, " ") }}</h2>
         <button type="button" class="c-btn mb-3" @click="$router.go(-1)">Back</button>
       </div>
       <div v-if="!reportData?.url && !reportData?.secondary_url">
         No URL Found in primary or secondary
       </div>
-      <div class="video-container" v-else>
+      <!-- <div class="video-container" v-else>
         <iframe
           class="w-full c-height block"
           :src="reportData?.url"
@@ -42,7 +41,8 @@ watch(() => route.params.id, updateReportData, { immediate: true });
           referrerpolicy="strict-origin-when-cross-origin"
           allowfullscreen
         ></iframe>
-      </div>
+      </div> -->
+      <PowerBIEmbed :id="$route?.params?.id" />
     </template>
   </MainLayout>
 </template>

@@ -36,7 +36,11 @@ const allpermissions = ref(
     key: `/${item?.name?.replace(/\s+/g, "_")}`,
     label: item?.name,
     onClick: () =>
-      router.push({ name: "dynamic", params: { id: item?.name?.replace(/\s+/g, "_") } }),
+      router.push({
+        name: "dynamic",
+        params: { id: item?.id },
+        query: { name: item?.name },
+      }),
   }))
 );
 
