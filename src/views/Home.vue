@@ -23,7 +23,7 @@ const allpermissions = ref(
   JSON.parse(localStorage.getItem("all_permissions")).map((item) => ({
     title: item?.name,
     path: "dynamic",
-    params: item?.name?.replace(/\s+/g, "_"),
+    params: item?.id,
   }))
 );
 </script>

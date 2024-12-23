@@ -33,13 +33,12 @@ const state = reactive({
 });
 const allpermissions = ref(
   JSON.parse(localStorage.getItem("all_permissions")).map((item) => ({
-    key: `/${item?.name?.replace(/\s+/g, "_")}`,
+    key: `/${item?.id}`,
     label: item?.name,
     onClick: () =>
       router.push({
         name: "dynamic",
         params: { id: item?.id },
-        query: { name: item?.name },
       }),
   }))
 );

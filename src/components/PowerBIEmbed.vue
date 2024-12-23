@@ -11,9 +11,9 @@ import * as pbi from "powerbi-client";
 import { apiBase, config } from "@/config";
 import axios from "axios";
 
-const accessToken = ref(""); // Stores the embed token fetched from the backend
-const embedUrl = ref(""); // Will be set dynamically from the backend
-const reportId = ref(""); // Will be set dynamically from the backend
+const accessToken = ref("");
+const embedUrl = ref("");
+const reportId = ref("");
 const embedContainer = ref(null);
 
 const fetchEmbedDetails = async () => {
@@ -75,9 +75,7 @@ const report_id = ref();
 const module = ref();
 onMounted(() => {
   embedReport();
-  const result = JSON.parse(localStorage.getItem("all_permissions"))?.find(
-    (item) => item.id === id
-  );
+  const result = JSON.parse(localStorage.getItem("all_permissions"))?.find((item) => item.id == id);
   console.log(result);
 });
 </script>

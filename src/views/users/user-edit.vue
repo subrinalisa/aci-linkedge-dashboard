@@ -234,7 +234,6 @@ onMounted(async () => {
               />
             </div>
             <div class="mb-3">
-              <!-- {{ permissionList }} -->
               <h4 class="text-base font-medium mb-1 flex items-center gap-x-2">
                 Manage Dashboard Permissions
                 <input
@@ -243,7 +242,6 @@ onMounted(async () => {
                   @change="toggleSelectAll($event)"
                 />
               </h4>
-              <!-- v-model="formData.permissions" -->
               <p v-if="permissionLoading">Loading...</p>
               <ul class="list-disc list-inside">
                 <li
