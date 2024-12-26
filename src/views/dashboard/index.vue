@@ -42,7 +42,6 @@ const updateReportData = () => {
 
 watch(() => route.params.id, updateReportData, { immediate: true });
 
-const content = ref();
 const toggleFullscreen = () => {
   const element = content.value;
   if (!document.fullscreenElement) {
@@ -63,7 +62,19 @@ const toggleFullscreen = () => {
 const refresh = () => {
   window.location.reload();
 };
-const printHandle = () => {};
+const content = ref();
+
+const printHandle = () => {
+  const printContent = content.value.innerHTML;
+  const printWindow = window.open("", "", "height=500, width=800");
+  console.log(printContent);
+
+  // printWindow.document.write("<html><head><title>Print</title></head><body>");
+  // printWindow.document.write(printContent);
+  // printWindow.document.write("</body></html>");
+  // printWindow.document.close(); // Required for IE
+  // printWindow.print();
+};
 </script>
 
 <template>
@@ -77,7 +88,7 @@ const printHandle = () => {};
           Full Screen
         </button>
         <button type="button" class="del_btn mr-3 mb-3" @click="refresh">Refresh</button>
-        <button type="button" class="del_btn mr-3 mb-3" @click="printHandle">Print</button>
+        <!-- <button type="button" class="del_btn mr-3 mb-3" @click="printHandle">Print</button> -->
         <button type="button" class="edit_btn mb-3" @click="$router.go(-1)">Back</button>
       </div>
     </div>
