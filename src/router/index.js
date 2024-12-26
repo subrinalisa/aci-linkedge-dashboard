@@ -24,6 +24,7 @@ const routes = [
     path: "/:id",
     name: "dynamic",
     component: Dashboard,
+
   },
   {
     path: "/user",

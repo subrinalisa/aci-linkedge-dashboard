@@ -9,22 +9,24 @@ import Spinner from "@/components/Spinner.vue";
 
 const isLoading = ref(false);
 const allData = ref([]);
+const backupData = ref([]);
 
 // Pagination
 const search = ref("");
 const paginate = ref(10);
 const total = ref(0);
 
-const getData = async (page = "") => {
+const getData = async (page = "", sort = "") => {
   isLoading.value = true;
   try {
     const res = await axios.get(
-      `${apiBase}/permission_list_with_paginate?search=${search.value}&paginate=${paginate.value}&page=${page}`,
+      `${apiBase}/permission_list_with_paginate?search=${search.value}&paginate=${paginate.value}&page=${page}&orderBy=${sort}&orderDir=${sort_type.value}`,
       config
     );
 
     isLoading.value = false;
     if (res?.data?.status == "success") {
+      backupData.value = res?.data?.permissions?.data;
       allData.value = res?.data?.permissions?.data;
       total.value = res?.data?.permissions?.total;
     }
@@ -92,6 +94,7 @@ const createNew = async (data) => {
 onMounted(async () => {
   await getData();
 });
+const sort_type = ref("asc");
 </script>
 
 <template>
@@ -119,12 +122,149 @@ onMounted(async () => {
       <thead class="table-header">
         <tr>
           <th class="w-16">Actions</th>
-          <th>Type</th>
-          <th>Title</th>
-          <th>Description</th>
-          <th>Url</th>
-          <th>Group ID</th>
-          <th>Report ID</th>
+          <th>
+            <div class="flex items-center">
+              Type<button
+                type="button"
+                @click="
+                  sort_type == 'asc' ? (sort_type = 'desc') : (sort_type = 'asc');
+                  getData('', 'report_type');
+                "
+              >
+                <svg
+                  class="w-3 h-3 ms-1.5"
+                  aria-hidden="true"
+                  xmlns="http://www.w3.org/2000/svg"
+                  fill="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    d="M8.574 11.024h6.852a2.075 2.075 0 0 0 1.847-1.086 1.9 1.9 0 0 0-.11-1.986L13.736 2.9a2.122 2.122 0 0 0-3.472 0L6.837 7.952a1.9 1.9 0 0 0-.11 1.986 2.074 2.074 0 0 0 1.847 1.086Zm6.852 1.952H8.574a2.072 2.072 0 0 0-1.847 1.087 1.9 1.9 0 0 0 .11 1.985l3.426 5.05a2.123 2.123 0 0 0 3.472 0l3.427-5.05a1.9 1.9 0 0 0 .11-1.985 2.074 2.074 0 0 0-1.846-1.087Z"
+                  />
+                </svg>
+              </button>
+            </div>
+          </th>
+          <th>
+            <div class="flex items-center">
+              Title
+              <button
+                type="button"
+                @click="
+                  sort_type == 'asc' ? (sort_type = 'desc') : (sort_type = 'asc');
+                  getData('', 'name');
+                "
+              >
+                <svg
+                  class="w-3 h-3 ms-1.5"
+                  aria-hidden="true"
+                  xmlns="http://www.w3.org/2000/svg"
+                  fill="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    d="M8.574 11.024h6.852a2.075 2.075 0 0 0 1.847-1.086 1.9 1.9 0 0 0-.11-1.986L13.736 2.9a2.122 2.122 0 0 0-3.472 0L6.837 7.952a1.9 1.9 0 0 0-.11 1.986 2.074 2.074 0 0 0 1.847 1.086Zm6.852 1.952H8.574a2.072 2.072 0 0 0-1.847 1.087 1.9 1.9 0 0 0 .11 1.985l3.426 5.05a2.123 2.123 0 0 0 3.472 0l3.427-5.05a1.9 1.9 0 0 0 .11-1.985 2.074 2.074 0 0 0-1.846-1.087Z"
+                  />
+                </svg>
+              </button>
+            </div>
+          </th>
+          <th>
+            <div class="flex items-center">
+              Description
+              <button
+                type="button"
+                @click="
+                  sort_type == 'asc' ? (sort_type = 'desc') : (sort_type = 'asc');
+                  getData('', 'description');
+                "
+              >
+                <svg
+                  class="w-3 h-3 ms-1.5"
+                  aria-hidden="true"
+                  xmlns="http://www.w3.org/2000/svg"
+                  fill="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    d="M8.574 11.024h6.852a2.075 2.075 0 0 0 1.847-1.086 1.9 1.9 0 0 0-.11-1.986L13.736 2.9a2.122 2.122 0 0 0-3.472 0L6.837 7.952a1.9 1.9 0 0 0-.11 1.986 2.074 2.074 0 0 0 1.847 1.086Zm6.852 1.952H8.574a2.072 2.072 0 0 0-1.847 1.087 1.9 1.9 0 0 0 .11 1.985l3.426 5.05a2.123 2.123 0 0 0 3.472 0l3.427-5.05a1.9 1.9 0 0 0 .11-1.985 2.074 2.074 0 0 0-1.846-1.087Z"
+                  />
+                </svg>
+              </button>
+            </div>
+          </th>
+          <th>
+            <div class="flex items-center">
+              Url
+              <button
+                type="button"
+                @click="
+                  sort_type == 'asc' ? (sort_type = 'desc') : (sort_type = 'asc');
+                  getData('', 'url');
+                "
+              >
+                <svg
+                  class="w-3 h-3 ms-1.5"
+                  aria-hidden="true"
+                  xmlns="http://www.w3.org/2000/svg"
+                  fill="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    d="M8.574 11.024h6.852a2.075 2.075 0 0 0 1.847-1.086 1.9 1.9 0 0 0-.11-1.986L13.736 2.9a2.122 2.122 0 0 0-3.472 0L6.837 7.952a1.9 1.9 0 0 0-.11 1.986 2.074 2.074 0 0 0 1.847 1.086Zm6.852 1.952H8.574a2.072 2.072 0 0 0-1.847 1.087 1.9 1.9 0 0 0 .11 1.985l3.426 5.05a2.123 2.123 0 0 0 3.472 0l3.427-5.05a1.9 1.9 0 0 0 .11-1.985 2.074 2.074 0 0 0-1.846-1.087Z"
+                  />
+                </svg>
+              </button>
+            </div>
+          </th>
+          <th>
+            <div class="flex items-center">
+              Group ID
+              <button
+                type="button"
+                @click="
+                  sort_type == 'asc' ? (sort_type = 'desc') : (sort_type = 'asc');
+                  getData('', 'module');
+                "
+              >
+                <svg
+                  class="w-3 h-3 ms-1.5"
+                  aria-hidden="true"
+                  xmlns="http://www.w3.org/2000/svg"
+                  fill="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    d="M8.574 11.024h6.852a2.075 2.075 0 0 0 1.847-1.086 1.9 1.9 0 0 0-.11-1.986L13.736 2.9a2.122 2.122 0 0 0-3.472 0L6.837 7.952a1.9 1.9 0 0 0-.11 1.986 2.074 2.074 0 0 0 1.847 1.086Zm6.852 1.952H8.574a2.072 2.072 0 0 0-1.847 1.087 1.9 1.9 0 0 0 .11 1.985l3.426 5.05a2.123 2.123 0 0 0 3.472 0l3.427-5.05a1.9 1.9 0 0 0 .11-1.985 2.074 2.074 0 0 0-1.846-1.087Z"
+                  />
+                </svg>
+              </button>
+            </div>
+          </th>
+          <th>
+            <div class="flex items-center">
+              Report ID
+              <button
+                type="button"
+                @click="
+                  sort_type == 'asc' ? (sort_type = 'desc') : (sort_type = 'asc');
+                  getData('', 'report_id');
+                "
+              >
+                <svg
+                  class="w-3 h-3 ms-1.5"
+                  aria-hidden="true"
+                  xmlns="http://www.w3.org/2000/svg"
+                  fill="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    d="M8.574 11.024h6.852a2.075 2.075 0 0 0 1.847-1.086 1.9 1.9 0 0 0-.11-1.986L13.736 2.9a2.122 2.122 0 0 0-3.472 0L6.837 7.952a1.9 1.9 0 0 0-.11 1.986 2.074 2.074 0 0 0 1.847 1.086Zm6.852 1.952H8.574a2.072 2.072 0 0 0-1.847 1.087 1.9 1.9 0 0 0 .11 1.985l3.426 5.05a2.123 2.123 0 0 0 3.472 0l3.427-5.05a1.9 1.9 0 0 0 .11-1.985 2.074 2.074 0 0 0-1.846-1.087Z"
+                  />
+                </svg>
+              </button>
+            </div>
+          </th>
         </tr>
       </thead>
       <tbody>
