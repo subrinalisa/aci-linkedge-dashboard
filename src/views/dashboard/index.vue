@@ -3,9 +3,9 @@ import MainLayout from "@/components/MainLayout.vue";
 import { ref, watch } from "vue";
 import { useRoute } from "vue-router";
 import PowerBIEmbed from "@/components/PowerBIEmbed.vue";
+import { FullscreenOutlined, ReloadOutlined, RollbackOutlined } from "@ant-design/icons-vue";
 
 const route = useRoute();
-const { id } = route?.params;
 const allpermissions = ref(JSON.parse(localStorage.getItem("all_permissions")));
 
 const reportData = ref(null);
@@ -63,18 +63,6 @@ const refresh = () => {
   window.location.reload();
 };
 const content = ref();
-
-const printHandle = () => {
-  const printContent = content.value.innerHTML;
-  const printWindow = window.open("", "", "height=500, width=800");
-  console.log(printContent);
-
-  // printWindow.document.write("<html><head><title>Print</title></head><body>");
-  // printWindow.document.write(printContent);
-  // printWindow.document.write("</body></html>");
-  // printWindow.document.close(); // Required for IE
-  // printWindow.print();
-};
 </script>
 
 <template>
@@ -84,12 +72,20 @@ const printHandle = () => {
         <h2 class="title mb-3">{{ reportData?.name }}</h2>
       </div>
       <div>
-        <button type="button" class="edit_btn mr-3 mb-3" @click="toggleFullscreen">
-          Full Screen
+        <button
+          type="button"
+          class="edit_btn mr-3 mb-3"
+          @click="toggleFullscreen"
+          title="Full Screen"
+        >
+          <FullscreenOutlined class="align-baseline" />
         </button>
-        <button type="button" class="del_btn mr-3 mb-3" @click="refresh">Refresh</button>
-        <!-- <button type="button" class="del_btn mr-3 mb-3" @click="printHandle">Print</button> -->
-        <button type="button" class="edit_btn mb-3" @click="$router.go(-1)">Back</button>
+        <button type="button" class="del_btn mr-3 mb-3" title="Refresh" @click="refresh">
+          <ReloadOutlined class="align-baseline" />
+        </button>
+        <button type="button" class="edit_btn mb-3" title="Back" @click="$router.go(-1)">
+          <RollbackOutlined class="align-baseline" />
+        </button>
       </div>
     </div>
     <div ref="content">
@@ -126,13 +122,3 @@ const printHandle = () => {
     </div>
   </MainLayout>
 </template>
-
-<style scoped>
-.c-height {
-  height: calc(100vh - 200px);
-}
-.fullscreen-container {
-  width: 100%;
-  height: 100vh;
-}
-</style>

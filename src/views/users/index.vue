@@ -4,9 +4,15 @@ import MainLayout from "@/components/MainLayout.vue";
 import { PlusOutlined, EditOutlined, DeleteOutlined } from "@ant-design/icons-vue";
 import { onMounted, ref } from "vue";
 import axios from "axios";
-import { apiBase, config } from "@/config";
+import { apiBase } from "@/config";
 import { showNotification } from "@/utilities/notification";
+import Cookies from "js-cookie";
 
+const config = {
+  headers: {
+    Authorization: `Bearer ${Cookies.get("token")}`,
+  },
+};
 /* User List */
 const usersList = ref(null);
 const isLoading = ref(false);

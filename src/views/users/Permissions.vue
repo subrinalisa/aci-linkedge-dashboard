@@ -1,5 +1,7 @@
 <script setup>
-import { apiBase, config } from "@/config";
+import { apiBase } from "@/config";
+import Cookies from "js-cookie";
+
 import { onMounted, ref } from "vue";
 import MainLayout from "@/components/MainLayout.vue";
 import axios from "axios";
@@ -7,6 +9,11 @@ import { DeleteOutlined, EditOutlined, PlusOutlined } from "@ant-design/icons-vu
 import { showNotification } from "@/utilities/notification";
 import Spinner from "@/components/Spinner.vue";
 
+const config = {
+  headers: {
+    Authorization: `Bearer ${Cookies.get("token")}`,
+  },
+};
 const isLoading = ref(false);
 const allData = ref([]);
 const backupData = ref([]);
@@ -79,13 +86,12 @@ const createNew = async (data) => {
     isInserting.value = false;
     showNotification(res?.data?.status, res?.data?.message);
     if (res?.data?.status == "success") {
-      // showNotification(res?.data?.status, res?.data?.message);
       resetForm();
       await getData();
       open.value = false;
     }
   } catch (err) {
-    showNotification(res?.data?.status, res?.data?.message);
+    showNotification("error", err?.response?.data?.message);
     isInserting.value = false;
     console.log(err);
   }
@@ -384,15 +390,12 @@ const sort_type = ref("asc");
           />
         </div>
         <div class="md:flex justify-between items-center">
-          <label for="name" class="text-sm w-44 mb-2"
-            >GroupID <span class="text-red-600">*</span></label
-          >
+          <label for="name" class="text-sm w-44 mb-2">GroupID </label>
           <input
             id="name"
             type="text"
             placeholder="GroupID"
             class="border w-full rounded px-3 py-1 outline-none"
-            required
             v-model="form.module"
           />
         </div>

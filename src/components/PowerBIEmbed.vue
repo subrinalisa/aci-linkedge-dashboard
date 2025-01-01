@@ -1,21 +1,36 @@
 <template>
-  <div>
-    <a-skeleton v-if="isLoading" />
-    <div ref="embedContainer" class="h-[100vh] w-full" v-else></div>
+  <a-skeleton v-if="isLoading" />
+  <div class="video-container" v-if="!isLoading && iframeUrl">
+    <iframe
+      class="w-full c-height block"
+      :src="iframeUrl"
+      frameborder="0"
+      title="YouTube video player"
+      allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+      referrerpolicy="strict-origin-when-cross-origin"
+      allowfullscreen
+    ></iframe>
   </div>
+  <div ref="embedContainer" class="h-[100vh] w-full" v-if="!isLoading && !iframeUrl"></div>
 </template>
 
 <script setup>
 import * as pbi from "powerbi-client";
 import axios from "axios";
-import { apiBase, config } from "@/config";
-import { ref, onMounted, nextTick, watch } from "vue";
+import { apiBase } from "@/config";
+import { ref, nextTick, watch } from "vue";
 import { useRoute } from "vue-router";
 import { showNotification } from "@/utilities/notification";
+import Cookies from "js-cookie";
 
+const config = {
+  headers: {
+    Authorization: `Bearer ${Cookies.get("token")}`,
+  },
+};
 const route = useRoute();
-const { id } = route?.params;
 const allpermissions = ref(JSON.parse(localStorage.getItem("all_permissions")));
+let iframeUrl = ref("");
 
 const reportData = ref(null);
 const reportType = ref("");
@@ -51,6 +66,7 @@ const fetchEmbedDetails = async () => {
       config
     );
     isLoading.value = false;
+    iframeUrl.value = "";
 
     if (
       response?.data?.status == "success" &&
@@ -63,8 +79,12 @@ const fetchEmbedDetails = async () => {
       reportId.value = response?.data?.reportId;
     }
   } catch (error) {
+    console.log("response err", error);
     console.error("Error fetching embed details:", error.message);
     isLoading.value = false;
+    iframeUrl.value =
+      allpermissions.value.find((item) => item.id == route.params.id)?.url ||
+      allpermissions.value.find((item) => item.id == route.params.id)?.secondary_url;
 
     if (error?.response?.data?.status == "error") {
       showNotification(
@@ -156,23 +176,4 @@ const updateReportData = async () => {
   await embedReport();
 };
 watch(() => route.params.id, updateReportData, { immediate: true });
-// onMounted(() => updateReportData());
-
-// onMounted(async () => {
-//   await embedReport();
-// });
-const toggleFullscreen = () => {
-  const element = embedContainer.value;
-  if (!document.embedContainer) {
-    // Enter fullscreen
-    element.requestFullscreen().catch((err) => {
-      console.error(`Error attempting to enable full-screen mode: ${err.message}`);
-    });
-  } else {
-    // Exit fullscreen
-    document.exitFullscreen().catch((err) => {
-      console.error(`Error attempting to exit full-screen mode: ${err.message}`);
-    });
-  }
-};
 </script>
