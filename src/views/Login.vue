@@ -1,49 +1,43 @@
 <template>
-  <section class="w-full box-border overflow-x-hidden">
-    <div class="flex flex-col md:flex-row h-screen items-center">
-      <div class="bg-indigo-600 hidden lg:block w-full md:w-1/2 xl:w-2/3 h-screen">
-        <img src="@/assets/images/login-bg.jpg" alt="bg" class="w-full h-full object-cover" />
+  <div class="login-section">
+    <div class="screen">
+      <div class="screen__content">
+        <form class="login" @submit.prevent="handleLogin(data, $router)">
+          <img src="@/assets/images/logo.png" class="w-[200px] block" alt="" />
+          <div class="login__field">
+            <i class="login__icon fas fa-user"></i>
+            <input
+              type="text"
+              class="login__input"
+              placeholder="User ID"
+              required
+              v-model="data.user_id"
+            />
+          </div>
+          <div class="login__field">
+            <i class="login__icon fas fa-lock"></i>
+            <input
+              type="password"
+              class="login__input"
+              placeholder="Password"
+              required
+              v-model="data.password"
+            />
+          </div>
+          <button class="button login__submit">
+            <span class="button__text">Log In Now</span>
+            <a-spin class="ml-2" v-if="isLoading" />
+          </button>
+        </form>
       </div>
-
-      <div
-        class="bg-white w-full md:max-w-md lg:max-w-full md:mx-auto md:w-1/2 xl:w-1/3 h-screen px-6 lg:px-16 xl:px-12 flex items-center justify-center"
-      >
-        <div class="w-full h-100">
-          <h1 class="text-xl md:text-2xl font-bold leading-tight mt-12">Log in to your account</h1>
-          <form class="mt-6" @submit.prevent="handleLogin(data, $router)">
-            <div>
-              <label class="block text-gray-700">User ID</label>
-              <input
-                type="text"
-                placeholder="Enter User ID"
-                class="w-full px-4 py-3 rounded-lg bg-gray-200 mt-2 border focus:border-blue-500 focus:bg-white focus:outline-none"
-                autofocus
-                required
-                v-model="data.user_id"
-              />
-            </div>
-            <div class="mt-4">
-              <label class="block text-gray-700">Password</label>
-              <input
-                type="password"
-                placeholder="Enter Password"
-                class="w-full px-4 py-3 rounded-lg bg-gray-200 mt-2 border focus:border-blue-500 focus:bg-white focus:outline-none"
-                required
-                v-model="data.password"
-              />
-            </div>
-
-            <button
-              type="submit"
-              class="w-full block bg-indigo-500 hover:bg-indigo-400 focus:bg-indigo-400 text-white text-base font-semibold rounded-lg px-4 py-3 mt-6"
-            >
-              Log In <a-spin class="white-spinner ml-2" v-if="isLoading" />
-            </button>
-          </form>
-        </div>
+      <div class="screen__background">
+        <span class="screen__background__shape screen__background__shape4"></span>
+        <span class="screen__background__shape screen__background__shape3"></span>
+        <span class="screen__background__shape screen__background__shape2"></span>
+        <span class="screen__background__shape screen__background__shape1"></span>
       </div>
     </div>
-  </section>
+  </div>
 </template>
 
 <script setup>
@@ -98,7 +92,143 @@ const handleLogin = async (data, router) => {
 </script>
 
 <style>
-.white-spinner .ant-spin-dot-item {
-  background: #fff !important;
+.login-section {
+  background: url(@/assets/images/login-bg.jpg) no-repeat center;
+  background-size: cover;
+  padding: 50px 0;
+  min-height: 100vh;
+}
+
+.screen {
+  background: linear-gradient(90deg, #5d54a4, #7c78b8);
+  position: relative;
+  height: 600px;
+  width: 360px;
+  box-shadow: 0px 0px 24px #5c5696;
+  margin: auto;
+}
+
+.screen__content {
+  z-index: 1;
+  position: relative;
+  height: 100%;
+}
+
+.screen__background {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 0;
+  -webkit-clip-path: inset(0 0 0 0);
+  clip-path: inset(0 0 0 0);
+}
+
+.screen__background__shape {
+  transform: rotate(45deg);
+  position: absolute;
+}
+
+.screen__background__shape1 {
+  height: 520px;
+  width: 520px;
+  background: #fff;
+  top: -50px;
+  right: 120px;
+  border-radius: 0 72px 0 0;
+}
+
+.screen__background__shape2 {
+  height: 220px;
+  width: 220px;
+  background: #6c63ac;
+  top: -172px;
+  right: 0;
+  border-radius: 32px;
+}
+
+.screen__background__shape3 {
+  height: 540px;
+  width: 190px;
+  background: linear-gradient(270deg, #5d54a4, #6a679e);
+  top: -24px;
+  right: 0;
+  border-radius: 32px;
+}
+
+.screen__background__shape4 {
+  height: 400px;
+  width: 200px;
+  background: #7e7bb9;
+  top: 420px;
+  right: 50px;
+  border-radius: 60px;
+}
+
+.login {
+  width: 320px;
+  padding: 30px;
+  padding-top: 156px;
+}
+
+.login__field {
+  padding: 20px 0px;
+  position: relative;
+}
+
+.login__icon {
+  position: absolute;
+  top: 30px;
+  color: #7875b5;
+}
+
+.login__input {
+  border: none;
+  border-bottom: 2px solid #d1d1d4;
+  background: none;
+  padding: 10px;
+  padding-left: 24px;
+  font-weight: 700;
+  width: 75%;
+  transition: 0.2s;
+}
+
+.login__input:active,
+.login__input:focus,
+.login__input:hover {
+  outline: none;
+  border-bottom-color: #6a679e;
+}
+
+.login__submit {
+  background: #fff;
+  font-size: 14px;
+  margin-top: 30px;
+  padding: 16px 20px;
+  border-radius: 26px;
+  border: 1px solid #d4d3e8;
+  text-transform: uppercase;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  width: 100%;
+  color: #4c489d;
+  box-shadow: 0px 2px 2px #5c5696;
+  cursor: pointer;
+  transition: 0.2s;
+}
+
+.login__submit:active,
+.login__submit:focus,
+.login__submit:hover {
+  border-color: #6a679e;
+  outline: none;
+}
+
+.button__icon {
+  font-size: 24px;
+  margin-left: auto;
+  color: #7875b5;
 }
 </style>

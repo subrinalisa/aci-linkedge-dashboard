@@ -137,15 +137,12 @@ onMounted(async () => {
           />
         </div>
         <div class="md:flex justify-between items-center">
-          <label for="name" class="text-sm w-44 mb-2"
-            >GroupID <span class="text-red-600">*</span></label
-          >
+          <label for="name" class="text-sm w-44 mb-2">GroupID </label>
           <input
             id="name"
             type="text"
             placeholder="GroupID"
             class="border w-full rounded px-3 py-1 outline-none"
-            required
             v-model="form.module"
           />
         </div>
