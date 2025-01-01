@@ -43,7 +43,7 @@ const getData = async (page = "", sort = "") => {
 };
 const isDeleting = ref(false);
 
-const deleteData = async (id) => {
+const deleteData = async (id, router) => {
   isDeleting.value = true;
   try {
     const res = await axios.delete(`${apiBase}/permissions/${id}`, config);
@@ -51,6 +51,11 @@ const deleteData = async (id) => {
     isDeleting.value = false;
     showNotification(res?.data?.status, res?.data?.message);
     if (res?.data?.status == "success") await getData();
+    localStorage.setItem(
+      "all_permissions",
+      JSON.stringify(res?.data?.auth_user_permission?.all_permissions)
+    );
+    window.location.reload();
   } catch (err) {
     isDeleting.value = false;
   }
@@ -292,7 +297,7 @@ const sort_type = ref("asc");
                 <EditOutlined class="align-middle" />
               </button>
 
-              <a-popconfirm title="Are you sure delete?" @confirm="deleteData(item?.id)">
+              <a-popconfirm title="Are you sure delete?" @confirm="deleteData(item?.id, $router)">
                 <button type="button" class="del_btn">
                   <DeleteOutlined class="align-middle" />
                 </button>
