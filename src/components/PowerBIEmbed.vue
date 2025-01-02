@@ -86,7 +86,7 @@ const fetchEmbedDetails = async () => {
       allpermissions.value.find((item) => item.id == route.params.id)?.url ||
       allpermissions.value.find((item) => item.id == route.params.id)?.secondary_url;
 
-    if (error?.response?.data?.status == "error") {
+    if (error?.response?.data?.status == "error" && !iframeUrl.value) {
       showNotification(
         error?.response?.data?.status,
         error?.response?.data?.message?.groupId?.at(0) ||
