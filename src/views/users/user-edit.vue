@@ -2,11 +2,17 @@
 import { ref, onMounted } from "vue";
 import MainLayout from "@/components/MainLayout.vue";
 import { useRoute } from "vue-router";
-import { apiBase, config } from "@/config";
+import { apiBase } from "@/config";
 import axios from "axios";
 import { showNotification } from "@/utilities/notification";
 import Spinner from "@/components/Spinner.vue";
+import Cookies from "js-cookie";
 
+const config = {
+  headers: {
+    Authorization: `Bearer ${Cookies.get("token")}`,
+  },
+};
 const route = useRoute();
 const { id } = route?.params;
 

@@ -3,10 +3,17 @@ import Spinner from "../../components/Spinner.vue";
 import { ref, onMounted } from "vue";
 import axios from "axios";
 import MainLayout from "@/components/MainLayout.vue";
-import { apiBase, config } from "@/config";
+import { apiBase } from "@/config";
 import { showNotification } from "@/utilities/notification";
 import { useRoute } from "vue-router";
 import router from "@/router";
+import Cookies from "js-cookie";
+
+const config = {
+  headers: {
+    Authorization: `Bearer ${Cookies.get("token")}`,
+  },
+};
 
 const form = ref({
   report_type: "",
