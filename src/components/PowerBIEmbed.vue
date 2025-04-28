@@ -1,4 +1,4 @@
-<template>
+<!-- <template>
   <a-skeleton v-if="isLoading" />
   <div class="video-container" v-if="!isLoading && iframeUrl">
     <iframe
@@ -12,6 +12,28 @@
     ></iframe>
   </div>
   <div ref="embedContainer" class="h-[100vh] w-full" v-if="!isLoading && !iframeUrl"></div>
+</template> -->
+
+<template>
+  <a-skeleton v-if="isLoading" />
+  <div class="video-container" v-if="!isLoading && iframeUrl">
+    <iframe class="w-full c-height block" :src="iframeUrl" frameborder="0" title="YouTube video player"
+      allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+      referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe>
+  </div>
+
+  <div v-if="!isLoading && !iframeUrl" class="relative">
+    <div ref="embedContainer" class="h-[90vh] w-full"></div>
+
+    <!-- Page List Dropdown (Only show if multiple pages available) -->
+    <div v-if="pages.length > 1" class="absolute bottom-3 left-0 right-0 flex justify-center lg:hidden">
+      <select v-model="selectedPage" class="p-2 rounded-md bg-white shadow">
+        <option v-for="page in pages" :key="page.name" :value="page.name">
+          {{ page.displayName }}
+        </option>
+      </select>
+    </div>
+  </div>
 </template>
 
 <script setup>
@@ -28,6 +50,7 @@ const config = {
     Authorization: `Bearer ${Cookies.get("token")}`,
   },
 };
+
 const route = useRoute();
 const allpermissions = ref(JSON.parse(localStorage.getItem("all_permissions")));
 let iframeUrl = ref("");
@@ -40,9 +63,11 @@ const reportCategory = ref("");
 
 const deviceType = ref("");
 
+const pages = ref([]);         // NEW ✨ to hold pages
+const selectedPage = ref("");   // NEW ✨ to track selected page
+
 const getDeviceType = () => {
   const userAgent = navigator.userAgent.toLowerCase();
-
   if (/mobile|android|iphone|ipad|ipod|blackberry|opera mini|windows phone/.test(userAgent)) {
     if (/tablet|ipad/.test(userAgent)) {
       return "Tablet";
@@ -57,6 +82,8 @@ const accessToken = ref("");
 const embedUrl = ref("");
 const embedContainer = ref(null);
 const isLoading = ref(false);
+
+let reportInstance = null;   // NEW ✨ to keep reference of report
 
 const fetchEmbedDetails = async () => {
   isLoading.value = true;
@@ -90,8 +117,8 @@ const fetchEmbedDetails = async () => {
       showNotification(
         error?.response?.data?.status,
         error?.response?.data?.message?.groupId?.at(0) ||
-          error?.response?.data?.message?.reportId?.at(0) ||
-          "Error in getting the report. Possible reason can be report id changed or developer token finished. Please contact MIS."
+        error?.response?.data?.message?.reportId?.at(0) ||
+        "Error in getting the report. Possible reason can be report id changed or developer token finished. Please contact MIS."
       );
     }
   }
@@ -115,10 +142,6 @@ const embedReport = async () => {
             filterPaneEnabled: false,
             navContentPaneEnabled: true,
             layoutType: pbi.models.LayoutType.MobilePortrait,
-            // panes: {
-            //   filters: { visible: true },
-            //   pageNavigation: { visible: true },
-            // },
           },
         };
       } else {
@@ -132,28 +155,32 @@ const embedReport = async () => {
           settings: {
             filterPaneEnabled: false,
             navContentPaneEnabled: true,
-            // panes: {
-            //   filters: { visible: true },
-            //   pageNavigation: { visible: true },
-            // },
           },
         };
       }
 
-      const powerbi = new pbi.service.Service(
+      const powerbiService = new pbi.service.Service(
         pbi.factories.hpmFactory,
         pbi.factories.wpmpFactory,
         pbi.factories.routerFactory
       );
 
       // Embed the report
-      const report = powerbi.embed(embedContainer.value, embedConfig);
+      reportInstance = powerbiService.embed(embedContainer.value, embedConfig); // Save instance
 
-      // Optional: Handle events
-      report.on("loaded", () => {
+      // Handle events
+      reportInstance.on("loaded", async () => {
         console.log("Report loaded successfully");
+
+        // Fetch pages after loading
+        const loadedPages = await reportInstance.getPages();
+        pages.value = loadedPages;
+        if (pages.value.length > 0) {
+          selectedPage.value = pages.value[0].name;
+        }
       });
-      report.on("error", (event) => {
+
+      reportInstance.on("error", (event) => {
         console.error("Error embedding report", event.detail);
       });
     });
@@ -161,6 +188,7 @@ const embedReport = async () => {
     console.error("Error embedding report:", error.message);
   }
 };
+
 const updateReportData = async () => {
   reportData.value = allpermissions.value.find((item) => item.id == route.params.id);
   reportId.value = reportData.value?.report_id;
@@ -175,5 +203,15 @@ const updateReportData = async () => {
 
   await embedReport();
 };
+
+const changePage = async () => {  // NEW ✨ function to change page
+  const page = pages.value.find(p => p.name === selectedPage.value);
+  if (page) {
+    await page.setActive();
+  }
+};
+
+watch(() => selectedPage.value, changePage); // NEW ✨ Watcher
+
 watch(() => route.params.id, updateReportData, { immediate: true });
 </script>
