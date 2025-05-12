@@ -3,7 +3,11 @@ import MainLayout from "@/components/MainLayout.vue";
 import { ref, watch } from "vue";
 import { useRoute } from "vue-router";
 import PowerBIEmbed from "@/components/PowerBIEmbed.vue";
-import { FullscreenOutlined, ReloadOutlined, RollbackOutlined } from "@ant-design/icons-vue";
+import {
+  FullscreenOutlined,
+  ReloadOutlined,
+  RollbackOutlined,
+} from "@ant-design/icons-vue";
 
 const route = useRoute();
 const allpermissions = ref(JSON.parse(localStorage.getItem("all_permissions")));
@@ -19,7 +23,11 @@ const deviceType = ref("");
 const getDeviceType = () => {
   const userAgent = navigator.userAgent.toLowerCase();
 
-  if (/mobile|android|iphone|ipad|ipod|blackberry|opera mini|windows phone/.test(userAgent)) {
+  if (
+    /mobile|android|iphone|ipad|ipod|blackberry|opera mini|windows phone/.test(
+      userAgent
+    )
+  ) {
     if (/tablet|ipad/.test(userAgent)) {
       return "Tablet";
     }
@@ -29,14 +37,17 @@ const getDeviceType = () => {
 };
 
 const updateReportData = () => {
-  reportData.value = allpermissions.value.find((item) => item.id == route.params.id);
+  reportData.value = allpermissions.value.find(
+    (item) => item.id == route.params.id
+  );
   reportId.value = reportData.value?.report_id;
   groupId.value = reportData.value?.module;
   reportType.value = reportData.value?.report_type;
   deviceType.value = getDeviceType();
 
   if (reportType.value === "PowerBI Report") reportCategory.value = "report";
-  else if (reportType.value === "PowerBI Dashboard") reportCategory.value = "dashboard";
+  else if (reportType.value === "PowerBI Dashboard")
+    reportCategory.value = "dashboard";
   else if (reportType.value === "PowerBI Tile") reportCategory.value = "tile";
 };
 
@@ -48,13 +59,17 @@ const toggleFullscreen = () => {
     // Enter fullscreen
     element.style.height = "100vh";
     element.requestFullscreen().catch((err) => {
-      console.error(`Error attempting to enable full-screen mode: ${err.message}`);
+      console.error(
+        `Error attempting to enable full-screen mode: ${err.message}`
+      );
     });
   } else {
     // Exit fullscreen
     element.style.height = "";
     document.exitFullscreen().catch((err) => {
-      console.error(`Error attempting to exit full-screen mode: ${err.message}`);
+      console.error(
+        `Error attempting to exit full-screen mode: ${err.message}`
+      );
     });
   }
 };
@@ -80,10 +95,20 @@ const content = ref();
         >
           <FullscreenOutlined class="align-baseline" />
         </button>
-        <button type="button" class="del_btn mr-3 mb-3" title="Refresh" @click="refresh">
+        <button
+          type="button"
+          class="del_btn mr-3 mb-3"
+          title="Refresh"
+          @click="refresh"
+        >
           <ReloadOutlined class="align-baseline" />
         </button>
-        <button type="button" class="edit_btn mb-3" title="Back" @click="$router.go(-1)">
+        <button
+          type="button"
+          class="edit_btn mb-3"
+          title="Back"
+          @click="$router.go(-1)"
+        >
           <RollbackOutlined class="align-baseline" />
         </button>
       </div>

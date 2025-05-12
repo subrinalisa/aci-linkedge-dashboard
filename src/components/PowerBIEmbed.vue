@@ -15,23 +15,75 @@
 </template> -->
 
 <template>
-  <a-skeleton v-if="isLoading" />
-  <div class="video-container" v-if="!isLoading && iframeUrl">
-    <iframe class="w-full c-height block" :src="iframeUrl" frameborder="0" title="YouTube video player"
-      allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
-      referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe>
-  </div>
-  <div v-if="!isLoading && !iframeUrl" class="relative">
-    <div ref="embedContainer" class="h-[90vh] w-full " v-touch:swipe.left="onSwipeLeft"
-      v-touch:swipe.right="onSwipeRight"></div>
+  <div>
+    <a-skeleton v-if="isLoading" />
+    <div class="video-container" v-if="!isLoading && iframeUrl">
+      <iframe
+        class="w-full c-height block"
+        :src="iframeUrl"
+        frameborder="0"
+        title="YouTube video player"
+        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+        referrerpolicy="strict-origin-when-cross-origin"
+        allowfullscreen
+      ></iframe>
+    </div>
+    <div v-if="!isLoading && !iframeUrl" class="relative">
+      <button
+        class="flex items-center justify-center p-3 bg-blue-400 opacity-70 text-white rounded-full animate-bounce hover:bg-blue-600 transition duration-300 border absolute top-1/2 right-0 lg:hidden"
+        @click="onSwipeLeft"
+      >
+        <svg
+          class="w-6 h-6"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="2"
+          viewBox="0 0 24 24"
+        >
+          <path
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            d="M17 8l4 4m0 0l-4 4m4-4H3"
+          />
+        </svg>
+      </button>
+      <button
+        class="flex items-center justify-center p-3 bg-blue-400 opacity-70 text-white rounded-full animate-bounce hover:bg-blue-600 transition duration-300 absolute top-1/2 left-0 lg:hidden"
+        @click="onSwipeRight"
+      >
+        <svg
+          class="w-6 h-6"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="2"
+          viewBox="0 0 24 24"
+        >
+          <path
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            d="M7 16l-4-4m0 0l4-4m-4 4h18"
+          />
+        </svg>
+      </button>
 
-    <!-- Page List Dropdown (Only show if multiple pages available) -->
-    <div v-if="pages.length > 1" class="absolute bottom-3 left-0 right-0 flex justify-center lg:hidden">
-      <select v-model="selectedPage" class="p-2 rounded-md bg-white shadow">
-        <option v-for="page in pages" :key="page.name" :value="page.name">
-          {{ page.displayName }}
-        </option>
-      </select>
+      <div
+        ref="embedContainer"
+        class="h-[90vh] w-full"
+        v-touch:swipe.right="onSwipeRight"
+        v-touch:swipe.left="onSwipeLeft"
+      ></div>
+
+      <!-- Page List Dropdown (Only show if multiple pages available) -->
+      <div
+        v-if="pages.length > 1"
+        class="absolute bottom-3 left-0 right-0 flex justify-center lg:hidden"
+      >
+        <select v-model="selectedPage" class="p-2 rounded-md bg-white shadow">
+          <option v-for="page in pages" :key="page.name" :value="page.name">
+            {{ page.displayName }}
+          </option>
+        </select>
+      </div>
     </div>
   </div>
 </template>
@@ -63,12 +115,16 @@ const reportCategory = ref("");
 
 const deviceType = ref("");
 
-const pages = ref([]);         // NEW ✨ to hold pages
-const selectedPage = ref("");   // NEW ✨ to track selected page
+const pages = ref([]); // NEW ✨ to hold pages
+const selectedPage = ref(""); // NEW ✨ to track selected page
 
 const getDeviceType = () => {
   const userAgent = navigator.userAgent.toLowerCase();
-  if (/mobile|android|iphone|ipad|ipod|blackberry|opera mini|windows phone/.test(userAgent)) {
+  if (
+    /mobile|android|iphone|ipad|ipod|blackberry|opera mini|windows phone/.test(
+      userAgent
+    )
+  ) {
     if (/tablet|ipad/.test(userAgent)) {
       return "Tablet";
     }
@@ -83,7 +139,7 @@ const embedUrl = ref("");
 const embedContainer = ref(null);
 const isLoading = ref(false);
 
-let reportInstance = null;   // NEW ✨ to keep reference of report
+let reportInstance = null; // NEW ✨ to keep reference of report
 
 const fetchEmbedDetails = async () => {
   isLoading.value = true;
@@ -111,14 +167,15 @@ const fetchEmbedDetails = async () => {
     isLoading.value = false;
     iframeUrl.value =
       allpermissions.value.find((item) => item.id == route.params.id)?.url ||
-      allpermissions.value.find((item) => item.id == route.params.id)?.secondary_url;
+      allpermissions.value.find((item) => item.id == route.params.id)
+        ?.secondary_url;
 
     if (error?.response?.data?.status == "error" && !iframeUrl.value) {
       showNotification(
         error?.response?.data?.status,
         error?.response?.data?.message?.groupId?.at(0) ||
-        error?.response?.data?.message?.reportId?.at(0) ||
-        "Error in getting the report. Possible reason can be report id changed or developer token finished. Please contact MIS."
+          error?.response?.data?.message?.reportId?.at(0) ||
+          "Error in getting the report. Possible reason can be report id changed or developer token finished. Please contact MIS."
       );
     }
   }
@@ -190,7 +247,9 @@ const embedReport = async () => {
 };
 
 const updateReportData = async () => {
-  reportData.value = allpermissions.value.find((item) => item.id == route.params.id);
+  reportData.value = allpermissions.value.find(
+    (item) => item.id == route.params.id
+  );
   reportId.value = reportData.value?.report_id;
   groupId.value = reportData.value?.module;
   reportType.value = reportData.value?.report_type;
@@ -198,14 +257,16 @@ const updateReportData = async () => {
   console.log("deviceType", deviceType.value);
 
   if (reportType.value === "PowerBI Report") reportCategory.value = "report";
-  else if (reportType.value === "PowerBI Dashboard") reportCategory.value = "dashboard";
+  else if (reportType.value === "PowerBI Dashboard")
+    reportCategory.value = "dashboard";
   else if (reportType.value === "PowerBI Tile") reportCategory.value = "tile";
 
   await embedReport();
 };
 
-const changePage = async () => {  // NEW ✨ function to change page
-  const page = pages.value.find(p => p.name === selectedPage.value);
+const changePage = async () => {
+  // NEW ✨ function to change page
+  const page = pages.value.find((p) => p.name === selectedPage.value);
   if (page) {
     await page.setActive();
   }
@@ -214,7 +275,9 @@ const changePage = async () => {  // NEW ✨ function to change page
 const onSwipeLeft = () => {
   console.log("swipe left");
 
-  const currentIndex = pages.value.findIndex(p => p.name === selectedPage.value);
+  const currentIndex = pages.value.findIndex(
+    (p) => p.name === selectedPage.value
+  );
   if (currentIndex < pages.value.length - 1) {
     selectedPage.value = pages.value[currentIndex + 1].name;
   }
@@ -222,7 +285,9 @@ const onSwipeLeft = () => {
 
 const onSwipeRight = () => {
   console.log("swipe right");
-  const currentIndex = pages.value.findIndex(p => p.name === selectedPage.value);
+  const currentIndex = pages.value.findIndex(
+    (p) => p.name === selectedPage.value
+  );
   if (currentIndex > 0) {
     selectedPage.value = pages.value[currentIndex - 1].name;
   }
