@@ -21,9 +21,9 @@
       allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
       referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe>
   </div>
-
   <div v-if="!isLoading && !iframeUrl" class="relative">
-    <div ref="embedContainer" class="h-[90vh] w-full"></div>
+    <div ref="embedContainer" class="h-[90vh] w-full " v-touch:swipe.left="onSwipeLeft"
+      v-touch:swipe.right="onSwipeRight"></div>
 
     <!-- Page List Dropdown (Only show if multiple pages available) -->
     <div v-if="pages.length > 1" class="absolute bottom-3 left-0 right-0 flex justify-center lg:hidden">
@@ -208,6 +208,23 @@ const changePage = async () => {  // NEW ✨ function to change page
   const page = pages.value.find(p => p.name === selectedPage.value);
   if (page) {
     await page.setActive();
+  }
+};
+
+const onSwipeLeft = () => {
+  console.log("swipe left");
+
+  const currentIndex = pages.value.findIndex(p => p.name === selectedPage.value);
+  if (currentIndex < pages.value.length - 1) {
+    selectedPage.value = pages.value[currentIndex + 1].name;
+  }
+};
+
+const onSwipeRight = () => {
+  console.log("swipe right");
+  const currentIndex = pages.value.findIndex(p => p.name === selectedPage.value);
+  if (currentIndex > 0) {
+    selectedPage.value = pages.value[currentIndex - 1].name;
   }
 };
 

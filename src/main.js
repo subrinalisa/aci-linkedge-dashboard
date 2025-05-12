@@ -10,10 +10,11 @@ import Antd from "ant-design-vue";
 import App from "./App.vue";
 import router from "./router";
 import "@/assets/css/style.scss";
+import Vue3TouchEvents from "vue3-touch-events";
 
 const app = createApp(App);
 
 const pinia = createPinia();
 pinia.use(piniaPluginPersistedstate);
 
-app.use(router).use(Antd).use(pinia).use(VueApexCharts).use(Vue3Toastify).use(VueSidebarMenu).mount("#app");
+app.use(router).use(Antd).use(pinia).use(VueApexCharts).use(Vue3Toastify).use(VueSidebarMenu).use(Vue3TouchEvents).mount("#app");
