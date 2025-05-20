@@ -30,7 +30,7 @@
     </div>
     <div v-if="!isLoading && !iframeUrl" class="relative">
       <button
-        class="flex items-center justify-center p-3 bg-blue-400 opacity-70 text-white rounded-full animate-bounce hover:bg-blue-600 transition duration-300 border absolute top-1/2 right-0 lg:hidden"
+        class="flex items-center justify-center p-3 bg-blue-400 opacity-70 text-white rounded-full animate-bounce hover:bg-blue-600 transition duration-300 border absolute top-1/2 right-0 -translate-y-1/2"
         @click="onSwipeLeft"
       >
         <svg
@@ -48,7 +48,7 @@
         </svg>
       </button>
       <button
-        class="flex items-center justify-center p-3 bg-blue-400 opacity-70 text-white rounded-full animate-bounce hover:bg-blue-600 transition duration-300 absolute top-1/2 left-0 lg:hidden"
+        class="flex items-center justify-center p-3 bg-blue-400 opacity-70 text-white rounded-full animate-bounce hover:bg-blue-600 transition duration-300 absolute top-1/2 left-0 -translate-y-1/2"
         @click="onSwipeRight"
       >
         <svg
@@ -72,11 +72,10 @@
         v-touch:swipe.right="onSwipeRight"
         v-touch:swipe.left="onSwipeLeft"
       ></div>
-
       <!-- Page List Dropdown (Only show if multiple pages available) -->
       <div
-        v-if="pages.length > 1"
-        class="absolute bottom-3 left-0 right-0 flex justify-center lg:hidden"
+        v-if="pages.length > 1 && deviceType == 'Mobile'"
+        class="absolute bottom-24 left-0 right-0 flex justify-center lg:hidden"
       >
         <select v-model="selectedPage" class="p-2 rounded-md bg-white shadow">
           <option v-for="page in pages" :key="page.name" :value="page.name">
@@ -120,18 +119,40 @@ const selectedPage = ref(""); // NEW ✨ to track selected page
 
 const getDeviceType = () => {
   const userAgent = navigator.userAgent.toLowerCase();
-  if (
-    /mobile|android|iphone|ipad|ipod|blackberry|opera mini|windows phone/.test(
-      userAgent
-    )
-  ) {
-    if (/tablet|ipad/.test(userAgent)) {
+
+  if (/tablet|ipad/.test(userAgent)) {
+    return "Tablet";
+  }
+
+  if (/android/.test(userAgent)) {
+    // Check if it's Android Tablet (no 'mobile' keyword in userAgent ususerAgentlly means tablet)
+    if (!/mobile/.test(userAgent)) {
       return "Tablet";
     }
     return "Mobile";
   }
+
+  if (/iphone|ipod|blackberry|opera mini|windows phone/.test(userAgent)) {
+    return "Mobile";
+  }
+
   return "Laptop/Desktop";
 };
+
+// const getDeviceType = () => {
+//   const userAgent = navigator.userAgent.toLowerCase();
+//   if (
+//     /mobile|android|iphone|ipad|ipod|blackberry|opera mini|windows phone/.test(
+//       userAgent
+//     )
+//   ) {
+//     if (/tablet|ipad/.test(userAgent)) {
+//       return "Tablet";
+//     }
+//     return "Mobile";
+//   }
+//   return "Laptop/Desktop";
+// };
 
 // Power BI
 const accessToken = ref("");
@@ -187,7 +208,7 @@ const embedReport = async () => {
 
     nextTick(() => {
       let embedConfig = {};
-      if (deviceType.value == "Mobile" || deviceType.value === "Tablet") {
+      if (deviceType.value == "Mobile") {
         embedConfig = {
           type: reportCategory.value,
           tokenType: pbi.models.TokenType.Embed,

@@ -16,9 +16,9 @@ export default defineConfig({
 
         // includeAssets: ['favicon.ico', 'robots.txt'],
         manifest: {
-          name: 'PBI Dashboard',
-          short_name: 'PBI',
-          description: 'A description of PBI',
+          name: 'Linkedge Dashboard',
+          short_name: 'Linkedge',
+          description: 'A description of Linkedge Dashboard',
           theme_color: '#ffffff',
           icons: [
             {

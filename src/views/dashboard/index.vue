@@ -53,10 +53,43 @@ const updateReportData = () => {
 
 watch(() => route.params.id, updateReportData, { immediate: true });
 
+// const toggleFullscreen = () => {
+//   const element = content.value;
+//   if (!document.fullscreenElement) {
+//     // Enter fullscreen
+//     element.style.height = "100vh";
+//     element.requestFullscreen().catch((err) => {
+//       console.error(
+//         `Error attempting to enable full-screen mode: ${err.message}`
+//       );
+//     });
+//   } else {
+//     // Exit fullscreen
+//     element.style.height = "";
+//     document.exitFullscreen().catch((err) => {
+//       console.error(
+//         `Error attempting to exit full-screen mode: ${err.message}`
+//       );
+//     });
+//   }
+// };
+
+// const refresh = () => {
+//   window.location.reload();
+// };
+const content = ref();
+const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream;
+
 const toggleFullscreen = () => {
   const element = content.value;
+
+  if (isIOS) {
+    // Fallback: Simulate fullscreen with CSS
+    element.classList.toggle("ios-fullscreen");
+    return;
+  }
+
   if (!document.fullscreenElement) {
-    // Enter fullscreen
     element.style.height = "100vh";
     element.requestFullscreen().catch((err) => {
       console.error(
@@ -64,7 +97,6 @@ const toggleFullscreen = () => {
       );
     });
   } else {
-    // Exit fullscreen
     element.style.height = "";
     document.exitFullscreen().catch((err) => {
       console.error(
@@ -73,18 +105,16 @@ const toggleFullscreen = () => {
     });
   }
 };
-
 const refresh = () => {
-  window.location.reload();
+  window.location.href = window.location.href;
 };
-const content = ref();
 </script>
 
 <template>
   <MainLayout>
     <div class="md:flex justify-between items-center">
       <div>
-        <h2 class="title mb-3">{{ reportData?.name }}</h2>
+        <!-- <h2 class="title mb-3">{{ reportData?.name }}</h2> -->
       </div>
       <div>
         <button
@@ -147,3 +177,16 @@ const content = ref();
     </div>
   </MainLayout>
 </template>
+
+<style>
+.ios-fullscreen {
+  position: fixed !important;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  z-index: 9999;
+  background: white; /* Or inherit from content */
+  overflow: auto;
+}
+</style>
