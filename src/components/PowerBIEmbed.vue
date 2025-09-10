@@ -75,9 +75,12 @@
       <!-- Page List Dropdown (Only show if multiple pages available) -->
       <div
         v-if="pages.length > 1 && deviceType == 'Mobile'"
-        class="absolute bottom-24 left-0 right-0 flex justify-center lg:hidden"
+        class="fixed bottom-[20px] left-1/2 right-0 -translate-x-1/2 flex justify-center lg:hidden z-40 max-w-[300px]"
       >
-        <select v-model="selectedPage" class="p-2 rounded-md bg-white shadow">
+        <select
+          v-model="selectedPage"
+          class="p-2 rounded-md bg-white shadow w-full"
+        >
           <option v-for="page in pages" :key="page.name" :value="page.name">
             {{ page.displayName }}
           </option>
@@ -85,6 +88,108 @@
       </div>
     </div>
   </div>
+  <a-button
+    htmlType="button"
+    aria-label="Open feedback form"
+    class="fixed bottom-[80px] right-6 md:bottom-8 md:right-8 z-50 inline-flex items-center gap-2 rounded-full px-6 py-3 bg-indigo-600 !text-white shadow-lg hover:bg-indigo-700 hover:opacity-100 focus:opacity-100 focus:outline-none focus-visible:ring-2 focus-visible:ring-indigo-400 active:scale-95 transition h-auto opacity-40"
+    :loading="feedback_data_loading"
+    @click="handleFeedback"
+  >
+    <svg
+      xmlns="http://www.w3.org/2000/svg"
+      class="h-5 w-5"
+      fill="none"
+      viewBox="0 0 24 24"
+      stroke="currentColor"
+    >
+      <path
+        stroke-linecap="round"
+        stroke-linejoin="round"
+        stroke-width="1.5"
+        d="M7 8h10M7 12h6m-8 8l-2 2V6a2 2 0 012-2h12a2 2 0 012 2v12a2 2 0 01-2 2H7z"
+      />
+    </svg>
+    <span class="hidden sm:inline">Feedback</span>
+  </a-button>
+  <a-modal v-model:open="open_feedback" title="" :footer="null">
+    <h2 class="font-medium text-lg text-indigo-600" v-if="feedback_data.length">
+      Previous Feedback
+    </h2>
+
+    <!-- Chat thread -->
+    <div ref="chatBox" class="capitalize">
+      <div
+        v-if="feedback_data.length == 0"
+        class="text-gray-500 text-left mb-5"
+      >
+        <a-empty>
+          <template #description>
+            <span> No Previous Feedback available </span>
+          </template>
+        </a-empty>
+      </div>
+
+      <div
+        v-for="(msg, i) in feedback_data"
+        :key="i"
+        class="mb-3 flex capitalize"
+        :class="msg.user_id == userInfo?.id ? 'justify-end' : 'justify-start'"
+      >
+        <!-- Avatar (optional) -->
+        <div v-if="msg?.user_id !== userInfo?.id" class="mr-2">
+          <div
+            class="h-8 w-8 rounded-full bg-indigo-100 flex items-center justify-center text-indigo-600 text-sm"
+          >
+            {{ msg?.user?.name?.slice(0, 1) }}
+          </div>
+        </div>
+
+        <!-- Bubble -->
+        <div
+          class="max-w-[75%] rounded-2xl px-3 py-2 shadow-sm"
+          :class="
+            msg.user_id == userInfo?.id
+              ? 'bg-indigo-600 text-white rounded-br-sm'
+              : 'bg-gray-100 text-gray-900 rounded-bl-sm'
+          "
+        >
+          <div class="whitespace-pre-line">{{ msg?.feedback }}</div>
+          <div class="mt-1 text-[11px] opacity-75 text-right">
+            {{ moment(msg.created_at).format("ll") }}
+          </div>
+        </div>
+
+        <div v-if="msg?.user_id == userInfo?.id" class="ml-2">
+          <div
+            class="h-8 w-8 rounded-full bg-indigo-600/10 flex items-center justify-center text-indigo-700 text-sm"
+            :title="msg?.user?.name"
+          >
+            {{ msg?.user?.name?.slice(0, 1) }}
+          </div>
+        </div>
+      </div>
+    </div>
+    <h2 class="font-medium text-lg text-indigo-600">Submit Your Feedback</h2>
+    <form @submit.prevent="submitFeedback()">
+      <div class="mb-4">
+        <label class="block my-2">Your Message</label>
+        <textarea
+          rows="2"
+          class="border w-full rounded-md p-3"
+          placeholder="Enter here..."
+          v-model="feedbackData.feedback"
+          required
+        ></textarea>
+      </div>
+      <a-button
+        class="bg-indigo-600 !text-white px-8 py-2 rounded-md h-auto"
+        htmlType="submit"
+        :loading="feedback_loading"
+      >
+        Submit
+      </a-button>
+    </form>
+  </a-modal>
 </template>
 
 <script setup>
@@ -95,14 +200,72 @@ import { ref, nextTick, watch } from "vue";
 import { useRoute } from "vue-router";
 import { showNotification } from "@/utilities/notification";
 import Cookies from "js-cookie";
+import moment from "moment";
 
+const userInfo = JSON.parse(localStorage.getItem("userInfo"));
+const route = useRoute();
 const config = {
   headers: {
     Authorization: `Bearer ${Cookies.get("token")}`,
   },
 };
+// Feedback
+const open_feedback = ref(false);
+const feedbackData = ref({
+  feedback: "",
+  menu: "",
+});
+const feedback_loading = ref(false);
+const feedback_data = ref([]);
+const feedback_data_loading = ref(false);
 
-const route = useRoute();
+const handleFeedback = async () => {
+  const activePage = await reportInstance.getActivePage();
+  console.log("Active Page Name:", activePage?.displayName);
+  feedbackData.value.menu = activePage?.displayName;
+
+  feedback_data_loading.value = true;
+  try {
+    const res = await axios.get(
+      `${apiBase}/get-permission-feedback/${route?.params?.id}?menu=${feedbackData.value.menu}`,
+      config
+    );
+    feedback_data_loading.value = false;
+    feedback_data.value = res?.data;
+  } catch (err) {
+    feedback_data_loading.value = false;
+    feedback_data.value = [];
+  }
+  open_feedback.value = true;
+};
+
+const submitFeedback = async () => {
+  const activePage = await reportInstance.getActivePage();
+  console.log("Active Page Name:", activePage?.displayName);
+  feedbackData.value.menu = activePage?.displayName;
+  feedback_loading.value = true;
+  try {
+    const res = await axios.put(
+      `${apiBase}/permission-feedback/${route?.params?.id}?feedback=${feedbackData.value.feedback}&menu=${feedbackData.value.menu}`,
+      "",
+      config
+    );
+
+    feedback_loading.value = false;
+    showNotification(res?.data?.status?.toLowerCase(), res?.data?.message);
+    if (res?.data?.status?.toLowerCase() == "success") {
+      feedbackData.value = {
+        feedback: "",
+        menu: "",
+      };
+    }
+  } catch (err) {
+    feedback_loading.value = false;
+    showNotification("error", err?.response?.data?.message || err?.message);
+  }
+  open_feedback.value = false;
+};
+
 const allpermissions = ref(JSON.parse(localStorage.getItem("all_permissions")));
 let iframeUrl = ref("");
 
@@ -114,8 +277,8 @@ const reportCategory = ref("");
 
 const deviceType = ref("");
 
-const pages = ref([]); // NEW ✨ to hold pages
-const selectedPage = ref(""); // NEW ✨ to track selected page
+const pages = ref([]);
+const selectedPage = ref("");
 
 const getDeviceType = () => {
   const userAgent = navigator.userAgent.toLowerCase();
@@ -248,11 +411,12 @@ const embedReport = async () => {
 
       // Handle events
       reportInstance.on("loaded", async () => {
-        console.log("Report loaded successfully");
-
-        // Fetch pages after loading
         const loadedPages = await reportInstance.getPages();
         pages.value = loadedPages;
+
+        const activePage = await reportInstance.getActivePage();
+        console.log("Active Page Name:", activePage?.displayName);
+
         if (pages.value.length > 0) {
           selectedPage.value = pages.value[0].name;
         }
@@ -286,7 +450,6 @@ const updateReportData = async () => {
 };
 
 const changePage = async () => {
-  // NEW ✨ function to change page
   const page = pages.value.find((p) => p.name === selectedPage.value);
   if (page) {
     await page.setActive();
